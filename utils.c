@@ -1,27 +1,18 @@
-#include <mpi.h>
+#include <omp.h>
 #include <stdio.h>
 
 #include "utils.h"
 
 
 void start_timer(struct Timer* timer){
-    timer->start_time = MPI_Wtime();
+    timer->start_time = omp_get_wtime();
 }
 
 void stop_timer(struct Timer* timer){
-    timer->end_time = MPI_Wtime();
+    timer->end_time = omp_get_wtime();
     timer->duration += timer->end_time - timer->start_time;
 }
 
-
-void verbose_mpi_status(MPI_Status status){
-    if(status.MPI_ERROR == MPI_SUCCESS){
-        printf("Success\n");
-    } else if(status.MPI_ERROR == MPI_ERR_REQUEST){
-        printf("MPI_ERR_REQUEST\n");
-    } else if(status.MPI_ERROR == MPI_ERR_ARG){
-        printf("MPI_ERR_ARG\n");
-    } else {
-        printf("Unknown\n");
-    }
+void report_timer(struct Timer* timer){
+        printf("%f\n", timer->duration);
 }
