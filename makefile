@@ -5,42 +5,62 @@ else
 PLATFORM=0
 endif
 
-ifeq ($(PLATFORM), 1)
-CCOMPILER=gcc-5
+
+ifeq ($(PLATFORM), 0)
+CCOMPILER=gcc
+MPI_CCOMPILER=mpicc
 CFLAGS=-c -Wall
 else
-CCOMPILER=fccpx
-#CFLAGS=-Kfast,openmp -Nsrc 
-CFLAGS=-c -Kfast,openmp
+CCOMPILER=mpiFCCpx
+MPI_CCOMPILER=mpiFCCpx
+CFLAGS=-Kfast
 endif
 
-LDFLAGS=-Kfast,openmp
+LDFLAGS=
 COMMON_SOURCES=matrix.c utils.c
-BUILD_SOURCES= main.c $(COMMON_SOURCES)
-BUILD_OBJECTS=$(BUILD_SOURCES:.cpp=.o)
-TEST_SOURCES= test.c $(COMMON_SOURCES)
+SOURCES=main.c $(COMMON_SOURCES)
+OBJECTS=$(SOURCES:.c=.o)
+TEST_SOURCES=test.c $(COMMON_SOURCES)
 TEST_OBJECTS=$(TEST_SOURCES:.c=.o)
 EXECUTABLE=app
-
+MPI_RUN=`which mpirun`
+MPI_RUN_FLAGS=
+NUM_THREADS=4
 
 all: compile link run clean
 
-compile: $(BUILD_SOURCES)
+test: run_tests clean
 
-$(EXECUTABLE): $(BUILD_OBJECTS)
-	$(CCOMPILER) $(LDFLAGS) $(BUILD_OBJECTS) -o $@
+run_tests: $(TEST_OBJECTS)
+	$(CCOMPILER) $(LDFLAGS) $(TEST_OBJECTS)  -o tests
+	./tests
 
-.cpp.o:
+ifeq ($(PLATFORM), 0)
+compile: $(SOURCES)
+else
+compile:
+	$(CCOMPILER) $(CFLAGS) $(SOURCES) -o $(EXECUTABLE)
+endif
+
+$(EXECUTABLE): $(OBJECTS)
+ifeq ($(PLATFORM), 0)
+	$(MPI_CCOMPILER) $(LDFLAGS) $(OBJECTS) -o $@
+else
+	$(MPI_CCOMPILER) $(LDFLAGS) $(OBJECTS)
+endif
+
+.c.o:
 	$(CCOMPILER) $(CFLAGS) $< -o $@
 
 link: $(EXECUTABLE)
 
 run:
-ifeq ($(PLATFORM), 1)
-	./$(EXECUTABLE)
+ifeq ($(PLATFORM), 0)
+	$(MPI_RUN) $(MPI_RUN_FLAGS) -n ${NUM_THREADS} ./$(EXECUTABLE)
 else
 	pjsub job.zsh
 endif
 
 clean:
-	-rm *.o
+	rm -f *o
+	rm -f job\.zsh\.o*

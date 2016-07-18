@@ -96,7 +96,7 @@ int  compare_matrix(float* left, float* right, int dimension){
     for (int i = 0; i < dimension; ++i) {
         for (int ii = 0; ii < dimension; ++ii) {
             float difference = fabsf(get(left, i, ii, dimension)  - get(right, i, ii, dimension));
-            if(difference > 0.10){
+            if(difference > 0.1){
                 printf("ERROR: %f (%d %d)\n",difference, i, ii);
                 return 0;
             }

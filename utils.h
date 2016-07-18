@@ -1,9 +1,9 @@
 struct Timer{
     double start_time;
     double end_time;
-    double duration;
+    double  duration;
 };
 
 void start_timer(struct Timer* timer);
 void stop_timer(struct Timer* timer);
-void report_timer(struct Timer* timer);
+void reset_timer(struct Timer* timer);
