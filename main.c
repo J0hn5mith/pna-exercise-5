@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include <omp.h>
 #include <math.h>
 #include "matrix.h"
 #include "utils.h"
@@ -9,6 +10,7 @@
 
 /*static MATRIX_SIZES[7] = [200, 400, 600, 800, 1000, 1200, 1400]*/
 const static int MATRIX_SIZES[3] = {200, 400, 600};
+const static int THREAD_SIZES[8] = {2, 4, 6, 8, 10, 12, 14, 16};
 
 
 struct Timer timer_global = {0};
@@ -85,7 +87,7 @@ void init(struct Node node, float** m, float** l, float** u, int dimension){
 	*l = generate_unit_matrix(dimension);
 }
 
-struct Measurement lu_decomposition(struct Node node, int dimension){
+struct Measurement lu_decomposition(struct Node node, int dimension, int threads){
 	float*  matrix, *u, *l = NULL;
 	init(node, &matrix, &l, &u, dimension);
 
@@ -93,6 +95,7 @@ struct Measurement lu_decomposition(struct Node node, int dimension){
 	reset_timer(&timer_computation);
 	reset_timer(&timer_communication);
 
+	omp_set_num_threads(threads);
 	MPI_Barrier(MPI_COMM_WORLD);
 	start_timer(&timer_global);
 	for (int step = 0; step < dimension; ++step) {
@@ -108,9 +111,11 @@ struct Measurement lu_decomposition(struct Node node, int dimension){
 				block_start = step + 1 + block_size * node.rank;
 			}
 			int end = block_start +  block_size;
+#pragma omp parallel for
 			for (int row = block_start; row < end; ++row) {
 				process_row(step, row, l, u, dimension);
 			}
+#pragma omp barrier
 		}
 		stop_timer(&timer_computation);
 
@@ -164,16 +169,19 @@ int main(int argc, char *argv[]) {
 		printf("time_total, time_computation, time_communication,  dimension, threads, ranks\n");
 	}
 	for (int i = 0; i < sizeof(MATRIX_SIZES)/sizeof(int); ++i) {
-		int dimension = MATRIX_SIZES[i];
-		struct Measurement m = lu_decomposition(node, dimension);
-		if(node.rank == 0){
-			printf("%f, ", m.global);
-			printf("%f, ", m.computation);
-			printf("%f, ", m.communication);
-			printf("%i, ", dimension);
-			printf("%i, ", 1);
-			printf("%i, ", node.world_size);
-			printf("\n");
+		for (int ii = 0; ii < sizeof(THREAD_SIZES)/sizeof(int); ++ii) {
+			int dimension = MATRIX_SIZES[i];
+			int threads = THREAD_SIZES[ii];
+			struct Measurement m = lu_decomposition(node, dimension, threads);
+			if(node.rank == 0){
+				printf("%f, ", m.global);
+				printf("%f, ", m.computation);
+				printf("%f, ", m.communication);
+				printf("%i, ", dimension);
+				printf("%i, ", 1);
+				printf("%i, ", node.world_size);
+				printf("\n");
+			}
 		}
 	}
 

@@ -7,16 +7,16 @@ endif
 
 
 ifeq ($(PLATFORM), 0)
-CCOMPILER=gcc
+CCOMPILER=gcc-5
 MPI_CCOMPILER=mpicc
-CFLAGS=-c -Wall
+CFLAGS=-c -Wall -openmp
 else
 CCOMPILER=mpiFCCpx
 MPI_CCOMPILER=mpiFCCpx
 CFLAGS=-Kfast
 endif
 
-LDFLAGS=
+LDFLAGS=-openmp
 COMMON_SOURCES=matrix.c utils.c
 SOURCES=main.c $(COMMON_SOURCES)
 OBJECTS=$(SOURCES:.c=.o)
