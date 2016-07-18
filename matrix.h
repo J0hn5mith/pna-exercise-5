@@ -1,0 +1,11 @@
+float* generate_matrix(int dimension);
+float* generate_unit_matrix(int dimension);
+float set(float* matrix, int row, int column, float value, int dimension);
+void set_row(float* matrix, int row, float* value, int dimension);
+void set_rows(float* matrix, int start_row, int num_rows, float* values, int dimension);
+float get(float* matrix, int row, int column, int dimension);
+void print_row(float* row, int dimension);
+void print_matrix(float* matrix, int dimension);
+void copy_matrix(float* original, float* copy, int dimension);
+float* mul_matrix(float* left, float* right, int dimension);
+int  compare_matrix(float* left, float* right, int dimension);
