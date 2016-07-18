@@ -1,3 +1,10 @@
+OS := $(shell uname)
+ifeq ($(OS), LINUX)
+PLATFORM=1
+else
+PLATFORM=0
+endif
+
 CCOMPILER=gcc-5
 CFLAGS=-c -Wall
 LDFLAGS= -fopenmp
