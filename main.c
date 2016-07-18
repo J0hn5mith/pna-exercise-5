@@ -8,7 +8,8 @@
 
 
 const int DIMENSIONS_LIST[5] = {100, 200, 400, 800, 1600};
-const int THREADS_LIST[4] = {1, 2, 4, 8};
+//const int DIMENSIONS_LIST[4] = {100, 200, 400, 800};
+const int THREADS_LIST[5] = {1, 2, 4, 8, 16};
 
 void process_remaining_rows(int step, float* l, float* u, int dimension){
 
