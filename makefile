@@ -5,9 +5,16 @@ else
 PLATFORM=0
 endif
 
+ifeq ($(PLATFORM), 1)
 CCOMPILER=gcc-5
 CFLAGS=-c -Wall
-LDFLAGS= -fopenmp
+else
+CCOMPILER=fccpx
+#CFLAGS=-Kfast,openmp -Nsrc 
+CFLAGS=-c -Kfast,openmp
+endif
+
+LDFLAGS=-Kfast,openmp
 COMMON_SOURCES=matrix.c utils.c
 BUILD_SOURCES= main.c $(COMMON_SOURCES)
 BUILD_OBJECTS=$(BUILD_SOURCES:.cpp=.o)

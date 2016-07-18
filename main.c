@@ -39,7 +39,6 @@ float lu_decomposition(int dimension, int threads){
 	}
 #pragma omp barrier
 	stop_timer(&timer);
-	int test = 10;
 
 	float* check = mul_matrix(l, u, dimension);
 	if(!compare_matrix(m, check, dimension)){
