@@ -36,7 +36,11 @@ $(EXECUTABLE): $(BUILD_OBJECTS)
 link: $(EXECUTABLE)
 
 run:
+ifeq ($(PLATFORM), 0)
 	./$(EXECUTABLE)
+else
+	pjsub job.zsh
+endif
 
 clean:
 	-rm *.o
