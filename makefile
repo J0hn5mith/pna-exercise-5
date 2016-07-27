@@ -1,5 +1,5 @@
 OS := $(shell uname)
-ifeq ($(OS), LINUX)
+ifeq ($(OS), Linux)
 PLATFORM=1
 else
 PLATFORM=0
@@ -13,8 +13,9 @@ CFLAGS=-c -Wall -openmp
 else
 CCOMPILER=mpiFCCpx
 MPI_CCOMPILER=mpiFCCpx
-CFLAGS=-Kfast
+CFLAGS=-Kfast -Xg -fopenmp
 endif
+
 
 LDFLAGS=-openmp
 COMMON_SOURCES=matrix.c utils.c

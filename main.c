@@ -8,9 +8,8 @@
 
 #define DEBUG 0
 
-/*static MATRIX_SIZES[7] = [200, 400, 600, 800, 1000, 1200, 1400]*/
-const static int MATRIX_SIZES[3] = {200, 400, 600};
-const static int THREAD_SIZES[8] = {2, 4, 6, 8, 10, 12, 14, 16};
+static int MATRIX_SIZES[20] = {100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000};
+const static int THREAD_SIZES[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 
 
 struct Timer timer_global = {0};
@@ -95,9 +94,9 @@ struct Measurement lu_decomposition(struct Node node, int dimension, int threads
 	reset_timer(&timer_computation);
 	reset_timer(&timer_communication);
 
-	omp_set_num_threads(threads);
 	MPI_Barrier(MPI_COMM_WORLD);
 	start_timer(&timer_global);
+	omp_set_num_threads(threads);
 	for (int step = 0; step < dimension; ++step) {
 		int remaining_rows = dimension - step - 1;
 
@@ -111,10 +110,15 @@ struct Measurement lu_decomposition(struct Node node, int dimension, int threads
 				block_start = step + 1 + block_size * node.rank;
 			}
 			int end = block_start +  block_size;
-#pragma omp parallel for
-			for (int row = block_start; row < end; ++row) {
+
+			int row;
+#pragma omp parallel
+{
+#pragma omp for
+			for (row = block_start; row < end; ++row) {
 				process_row(step, row, l, u, dimension);
 			}
+}
 #pragma omp barrier
 		}
 		stop_timer(&timer_computation);
@@ -162,7 +166,6 @@ struct Measurement lu_decomposition(struct Node node, int dimension, int threads
 }
 
 
-
 int main(int argc, char *argv[]) {
 	struct Node node = init_mpi();
 	if(node.rank == 0){
@@ -178,7 +181,7 @@ int main(int argc, char *argv[]) {
 				printf("%f, ", m.computation);
 				printf("%f, ", m.communication);
 				printf("%i, ", dimension);
-				printf("%i, ", 1);
+				printf("%i, ", threads);
 				printf("%i, ", node.world_size);
 				printf("\n");
 			}
